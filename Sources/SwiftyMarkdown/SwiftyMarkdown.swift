@@ -593,7 +593,7 @@ extension SwiftyMarkdown {
 				}
 				#if !os(macOS)
 				let image1Attachment = NSTextAttachment()
-				image1Attachment.image = UIImage(named: token.metadataStrings[imgIdx])
+                image1Attachment.image = UIImage(named: token.metadataStrings[imgIdx])?.withTintColor(attributes[.foregroundColor] as? UIColor ?? .white, renderingMode: .alwaysTemplate)
 				let str = NSAttributedString(attachment: image1Attachment)
 				finalAttributedString.append(str)
 				#elseif !os(watchOS)
