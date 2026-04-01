@@ -29,7 +29,8 @@ enum Rule {
 	case referencedLinks
 	case referencedImages
 	case tildes
-	
+	case systemImages
+
 	func asCharacterRule() -> CharacterRule {
 		switch self {
 		case .images:
@@ -43,11 +44,13 @@ enum Rule {
 		case .asterisks:
 			return SwiftyMarkdown.characterRules.filter({ $0.primaryTag.tag == "*" }).first!
 		case .underscores:
-			return SwiftyMarkdown.characterRules.filter({ $0.primaryTag.tag == "_" }).first!
+			return SwiftyMarkdown.characterRules.filter({ $0.primaryTag.tag == "_" && $0.primaryTag.type == .repeating }).first!
 		case .referencedLinks:
 			return SwiftyMarkdown.characterRules.filter({ $0.primaryTag.tag == "[" && $0.metadataLookup  }).first!
 		case .referencedImages:
 			return SwiftyMarkdown.characterRules.filter({ $0.primaryTag.tag == "![" && $0.metadataLookup  }).first!
+		case .systemImages:
+			return SwiftyMarkdown.characterRules.filter({ $0.primaryTag.tag == "_[" }).first!
 		}
 	}
 }
@@ -85,7 +88,7 @@ class SwiftyMarkdownCharacterTests : XCTestCase {
 extension XCTestCase {
 	
 	func resourceURL(for filename : String ) -> URL {
-		let thisSourceFile = URL(fileURLWithPath: #file)
+		let thisSourceFile = URL(fileURLWithPath: #filePath)
 		let thisDirectory = thisSourceFile.deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
 		return thisDirectory.appendingPathComponent("Resources", isDirectory: true).appendingPathComponent(filename)
 	}

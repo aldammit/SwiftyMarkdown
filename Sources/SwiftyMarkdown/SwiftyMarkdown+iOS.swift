@@ -26,25 +26,13 @@ extension SwiftyMarkdown {
 		switch line.lineStyle as! MarkdownLineStyle {
 		case .h1:
 			style = self.h1
-			if #available(iOS 9, *) {
-				textStyle = UIFont.TextStyle.title1
-			} else {
-				textStyle = UIFont.TextStyle.headline
-			}
+			textStyle = UIFont.TextStyle.title1
 		case .h2:
 			style = self.h2
-			if #available(iOS 9, *) {
-				textStyle = UIFont.TextStyle.title2
-			} else {
-				textStyle = UIFont.TextStyle.headline
-			}
+			textStyle = UIFont.TextStyle.title2
 		case .h3:
 			style = self.h3
-			if #available(iOS 9, *) {
-				textStyle = UIFont.TextStyle.title2
-			} else {
-				textStyle = UIFont.TextStyle.subheadline
-			}
+			textStyle = UIFont.TextStyle.title2
 		case .h4:
 			style = self.h4
 			textStyle = UIFont.TextStyle.headline
@@ -59,6 +47,10 @@ extension SwiftyMarkdown {
 			textStyle = UIFont.TextStyle.body
 		case .blockquote:
 			style = self.blockquotes
+			textStyle = UIFont.TextStyle.body
+		case .unorderedList, .unorderedListIndentFirstOrder, .unorderedListIndentSecondOrder,
+		     .orderedList, .orderedListIndentFirstOrder, .orderedListIndentSecondOrder:
+			style = self.list
 			textStyle = UIFont.TextStyle.body
 		default:
 			style = self.body
@@ -164,7 +156,7 @@ extension SwiftyMarkdown {
 		case .blockquote:
 			return blockquotes.color
 		case .unorderedList, .unorderedListIndentFirstOrder, .unorderedListIndentSecondOrder, .orderedList, .orderedListIndentFirstOrder, .orderedListIndentSecondOrder:
-			return body.color
+			return list.color
 		case .referencedLink:
 			return link.color
 		}

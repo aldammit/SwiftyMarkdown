@@ -10,7 +10,7 @@ import Foundation
 import os.log
 
 extension OSLog {
-	private static var subsystem = "SwiftyLineProcessor"
+	private static let subsystem = "SwiftyLineProcessor"
 	static let swiftyLineProcessorPerformance = OSLog(subsystem: subsystem, category: "Swifty Line Processor Performance")
 }
 

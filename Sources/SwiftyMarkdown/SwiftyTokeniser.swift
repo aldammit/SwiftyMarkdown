@@ -9,7 +9,7 @@ import Foundation
 import os.log
 
 extension OSLog {
-	private static var subsystem = "SwiftyTokeniser"
+	private static let subsystem = "SwiftyTokeniser"
 	static let tokenising = OSLog(subsystem: subsystem, category: "Tokenising")
 	static let styling = OSLog(subsystem: subsystem, category: "Styling")
 	static let performance = OSLog(subsystem: subsystem, category: "Peformance")

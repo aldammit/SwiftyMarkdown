@@ -6,6 +6,8 @@ Show Images From Your App Bundle!
 ---
 ![Image](bubble)
 
+Inline SF Symbols work too: _[Image](star.fill) _[Image](heart.fill) _[Image](checkmark.circle)
+
 Customise fonts and colors easily in a Swift-like way: 
 
     md.code.fontName = "CourierNewPSMT"
@@ -39,7 +41,7 @@ It ignores random * and correctly handles escaped \*asterisks\* and \_underlines
 1. List item
 1. List item
 	- Mix
-		- List styles
+		- ## List styles
 1. List item with a longer string to make sure indentation is consistent
 1. List item
 1. List item

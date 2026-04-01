@@ -13,7 +13,7 @@ import UIKit
 #endif
 
 extension OSLog {
-	private static var subsystem = "SwiftyMarkdown"
+	private static let subsystem = "SwiftyMarkdown"
 	static let swiftyMarkdownPerformance = OSLog(subsystem: subsystem, category: "Swifty Markdown Performance")
 }
 
@@ -24,6 +24,7 @@ public enum CharacterStyle : CharacterStyling {
 	case code
 	case link
 	case image
+	case systemImage
 	case referencedLink
 	case referencedImage
 	case strikethrough
@@ -148,14 +149,30 @@ If that is not set, then the system default will be used.
 	#endif
 }
 
+@objc open class ImageStyles: NSObject {
+	#if os(macOS)
+	public var color: NSColor? = nil
+	#else
+	public var color: UIColor? = nil
+	#endif
+	public var size: CGSize = .zero
+	public var verticalOffset: CGFloat = 0.0
+}
+
+public enum BulletType {
+	case string(String)
+	case image(String)
+	case systemImage(String)
+}
+
 /// A class that takes a [Markdown](https://daringfireball.net/projects/markdown/) string or file and returns an NSAttributedString with the applied styles. Supports Dynamic Type.
 @objc open class SwiftyMarkdown: NSObject {
 	
-	static public var frontMatterRules = [
+	nonisolated(unsafe) static public var frontMatterRules = [
 		FrontMatterRule(openTag: "---", closeTag: "---", keyValueSeparator: ":")
 	]
-	
-	static public var lineRules = [
+
+	nonisolated(unsafe) static public var lineRules = [
 		LineRule(token: "=", type: MarkdownLineStyle.previousH1, removeFrom: .entireLine, changeAppliesTo: .previous),
 		LineRule(token: "-", type: MarkdownLineStyle.previousH2, removeFrom: .entireLine, changeAppliesTo: .previous),
 		LineRule(token: "\t\t- ", type: MarkdownLineStyle.unorderedListIndentSecondOrder, removeFrom: .leading, shouldTrim: false),
@@ -178,7 +195,12 @@ If that is not set, then the system default will be used.
 		LineRule(token: "# ",type : MarkdownLineStyle.h1, removeFrom: .both)
 	]
 	
-	static public var characterRules = [
+	nonisolated(unsafe) static public var characterRules = [
+		CharacterRule(primaryTag: CharacterRuleTag(tag: "_[", type: .open), otherTags: [
+				CharacterRuleTag(tag: "]", type: .close),
+				CharacterRuleTag(tag: "(", type: .metadataOpen),
+				CharacterRuleTag(tag: ")", type: .metadataClose)
+		], styles: [1: CharacterStyle.systemImage], metadataLookup: false, definesBoundary: true),
 		CharacterRule(primaryTag: CharacterRuleTag(tag: "![", type: .open), otherTags: [
 				CharacterRuleTag(tag: "]", type: .close),
 				CharacterRuleTag(tag: "[", type: .metadataOpen),
@@ -246,7 +268,10 @@ If that is not set, then the system default will be used.
 	
 	open var strikethrough = BasicStyles()
 	
-	public var bullet : String = "・"
+	open var list = LineStyles()
+	public var bulletStyle: BulletType = .string("・")
+	open var image = ImageStyles()
+	open var systemImage = ImageStyles()
 	
 	public var underlineLinks : Bool = false
 	
@@ -306,9 +331,7 @@ If that is not set, then the system default will be used.
 		#if os(macOS)
 		self.setFontColorForAllStyles(with: .labelColor)
 		#elseif !os(watchOS)
-		if #available(iOS 13.0, tvOS 13.0, *) {
-			self.setFontColorForAllStyles(with: .label)
-		}
+		self.setFontColorForAllStyles(with: .label)
 		#endif
 	}
 	
@@ -325,6 +348,7 @@ If that is not set, then the system default will be used.
 		h5.fontSize = size
 		h6.fontSize = size
 		body.fontSize = size
+		list.fontSize = size
 		italic.fontSize = size
 		bold.fontSize = size
 		code.fontSize = size
@@ -342,6 +366,7 @@ If that is not set, then the system default will be used.
 		h5.color = color
 		h6.color = color
 		body.color = color
+		list.color = color
 		italic.color = color
 		bold.color = color
 		code.color = color
@@ -358,6 +383,7 @@ If that is not set, then the system default will be used.
 		h5.color = color
 		h6.color = color
 		body.color = color
+		list.color = color
 		italic.color = color
 		bold.color = color
 		code.color = color
@@ -375,6 +401,7 @@ If that is not set, then the system default will be used.
 		h5.fontName = name
 		h6.fontName = name
 		body.fontName = name
+		list.fontName = name
 		italic.fontName = name
 		bold.fontName = name
 		code.fontName = name
@@ -453,32 +480,37 @@ extension SwiftyMarkdown {
 			preconditionFailure("The passed line style is not a valid Markdown Line Style")
 		}
 		
-		var listItem = self.bullet
+		var listItemString: String
+		switch self.bulletStyle {
+		case .string(let s): listItemString = s
+		case .image, .systemImage: listItemString = ""
+		}
 		switch markdownLineStyle {
 		case .orderedList:
 			self.orderedListCount += 1
 			self.orderedListIndentFirstOrderCount = 0
 			self.orderedListIndentSecondOrderCount = 0
-			listItem = "\(self.orderedListCount)."
+			listItemString = "\(self.orderedListCount)."
 		case .orderedListIndentFirstOrder, .unorderedListIndentFirstOrder:
 			self.orderedListIndentFirstOrderCount += 1
 			self.orderedListIndentSecondOrderCount = 0
 			if markdownLineStyle == .orderedListIndentFirstOrder {
-				listItem = "\(self.orderedListIndentFirstOrderCount)."
+				listItemString = "\(self.orderedListIndentFirstOrderCount)."
 			}
-			
+
 		case .orderedListIndentSecondOrder, .unorderedListIndentSecondOrder:
 			self.orderedListIndentSecondOrderCount += 1
 			if markdownLineStyle == .orderedListIndentSecondOrder {
-				listItem = "\(self.orderedListIndentSecondOrderCount)."
+				listItemString = "\(self.orderedListIndentSecondOrderCount)."
 			}
-			
+
 		default:
 			self.orderedListCount = 0
 			self.orderedListIndentFirstOrderCount = 0
 			self.orderedListIndentSecondOrderCount = 0
 		}
 
+		var bulletAttachmentString: NSAttributedString? = nil
 		let lineProperties : LineProperties
 		switch markdownLineStyle {
 		case .h1:
@@ -520,15 +552,70 @@ extension SwiftyMarkdown {
 				break
 			}
 			
-			lineProperties = body
-			
+			lineProperties = self.list
+
 			let paragraphStyle = NSMutableParagraphStyle()
 			paragraphStyle.tabStops = [NSTextTab(textAlignment: .left, location: interval, options: [:]), NSTextTab(textAlignment: .left, location: interval, options: [:])]
 			paragraphStyle.defaultTabInterval = interval
 			paragraphStyle.headIndent = addition
 
 			attributes[.paragraphStyle] = paragraphStyle
-			finalTokens.insert(Token(type: .string, inputString: "\(indent)\(listItem)\t"), at: 0)
+
+			let isUnordered: Bool = {
+				switch markdownLineStyle {
+				case .unorderedList, .unorderedListIndentFirstOrder, .unorderedListIndentSecondOrder: return true
+				default: return false
+				}
+			}()
+
+			if isUnordered {
+				switch self.bulletStyle {
+				case .string:
+					finalTokens.insert(Token(type: .string, inputString: "\(indent)\(listItemString)\t"), at: 0)
+				case .image(let name):
+					if self.applyAttachments {
+						#if !os(macOS)
+						let lineFont = self.font(for: line)
+						let lineColor = self.color(for: line)
+						let baseAttrs: [NSAttributedString.Key: AnyObject] = [.font: lineFont, .foregroundColor: lineColor, .paragraphStyle: paragraphStyle]
+						let bstr = NSMutableAttributedString(string: indent, attributes: baseAttrs)
+						let attach = NSTextAttachment()
+						attach.image = UIImage(named: name)?.withTintColor(self.image.color ?? lineColor, renderingMode: .alwaysTemplate)
+						applyImageStyles(self.image, to: attach)
+						bstr.append(NSAttributedString(attachment: attach))
+						bstr.append(NSAttributedString(string: "\t", attributes: baseAttrs))
+						bulletAttachmentString = bstr
+						#else
+						finalTokens.insert(Token(type: .string, inputString: "\(indent)\t"), at: 0)
+						#endif
+					} else {
+						finalTokens.insert(Token(type: .string, inputString: "\(indent)\t"), at: 0)
+					}
+				case .systemImage(let name):
+					if self.applyAttachments {
+						#if !os(macOS)
+						let lineFont = self.font(for: line)
+						let lineColor = self.color(for: line)
+						let baseAttrs: [NSAttributedString.Key: AnyObject] = [.font: lineFont, .foregroundColor: lineColor, .paragraphStyle: paragraphStyle]
+						let bstr = NSMutableAttributedString(string: indent, attributes: baseAttrs)
+						let attach = NSTextAttachment()
+						let config = UIImage.SymbolConfiguration(pointSize: lineFont.pointSize)
+						let tintColor = self.systemImage.color ?? lineColor
+						attach.image = UIImage(systemName: name, withConfiguration: config)?.withTintColor(tintColor, renderingMode: .alwaysTemplate)
+						applyImageStyles(self.systemImage, to: attach)
+						bstr.append(NSAttributedString(attachment: attach))
+						bstr.append(NSAttributedString(string: "\t", attributes: baseAttrs))
+						bulletAttachmentString = bstr
+						#else
+						finalTokens.insert(Token(type: .string, inputString: "\(indent)\t"), at: 0)
+						#endif
+					} else {
+						finalTokens.insert(Token(type: .string, inputString: "\(indent)\t"), at: 0)
+					}
+				}
+			} else {
+				finalTokens.insert(Token(type: .string, inputString: "\(indent)\(listItemString)\t"), at: 0)
+			}
 			
 		case .yaml:
 			lineProperties = body
@@ -551,6 +638,10 @@ extension SwiftyMarkdown {
         attributes[.paragraphStyle] = paragraphStyle
 		
 		
+		if let bulletStr = bulletAttachmentString {
+			finalAttributedString.append(bulletStr)
+		}
+
 		for token in finalTokens {
 			attributes[.font] = self.font(for: line)
 			attributes[.link] = nil
@@ -593,7 +684,9 @@ extension SwiftyMarkdown {
 				}
 				#if !os(macOS)
 				let image1Attachment = NSTextAttachment()
-                image1Attachment.image = UIImage(named: token.metadataStrings[imgIdx])?.withTintColor(attributes[.foregroundColor] as? UIColor ?? .white, renderingMode: .alwaysTemplate)
+				let tintColor = self.image.color ?? (attributes[.foregroundColor] as? UIColor ?? .label)
+				image1Attachment.image = UIImage(named: token.metadataStrings[imgIdx])?.withTintColor(tintColor, renderingMode: .alwaysTemplate)
+				applyImageStyles(self.image, to: image1Attachment)
 				let str = NSAttributedString(attachment: image1Attachment)
 				finalAttributedString.append(str)
 				#elseif !os(watchOS)
@@ -605,6 +698,21 @@ extension SwiftyMarkdown {
 				continue
 			}
 			#endif
+
+			if let sfIdx = styles.firstIndex(of: .systemImage), sfIdx < token.metadataStrings.count {
+				if !self.applyAttachments { continue }
+				#if !os(macOS)
+				let symbolName = token.metadataStrings[sfIdx]
+				let pointSize = (attributes[.font] as? UIFont)?.pointSize ?? UIFont.systemFontSize
+				let config = UIImage.SymbolConfiguration(pointSize: pointSize)
+				let sfAttach = NSTextAttachment()
+				let sfTintColor = self.systemImage.color ?? (attributes[.foregroundColor] as? UIColor ?? .label)
+				sfAttach.image = UIImage(systemName: symbolName, withConfiguration: config)?.withTintColor(sfTintColor, renderingMode: .alwaysTemplate)
+				applyImageStyles(self.systemImage, to: sfAttach)
+				finalAttributedString.append(NSAttributedString(attachment: sfAttach))
+				#endif
+				continue
+			}
 			
 			if styles.contains(.code) {
 				attributes[.foregroundColor] = self.code.color
@@ -617,5 +725,15 @@ extension SwiftyMarkdown {
 		}
 	
 		return finalAttributedString
+	}
+
+	private func applyImageStyles(_ styles: ImageStyles, to attachment: NSTextAttachment) {
+		guard styles.size != .zero || styles.verticalOffset != 0 else { return }
+		#if !os(macOS)
+		if let img = attachment.image {
+			let size = styles.size == .zero ? img.size : styles.size
+			attachment.bounds = CGRect(x: 0, y: styles.verticalOffset, width: size.width, height: size.height)
+		}
+		#endif
 	}
 }

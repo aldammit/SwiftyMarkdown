@@ -16,7 +16,7 @@ import Foundation
 import os.log
 
 extension OSLog {
-	private static var subsystem = "SwiftyScanner"
+	private static let subsystem = "SwiftyScanner"
 	static let swiftyScanner = OSLog(subsystem: subsystem, category: "Swifty Scanner Scanner")
 	static let swiftyScannerPerformance = OSLog(subsystem: subsystem, category: "Swifty Scanner Scanner Peformance")
 }

@@ -38,6 +38,9 @@ extension SwiftyMarkdown {
 			style = self.code
 		case .blockquote:
 			style = self.blockquotes
+		case .unorderedList, .unorderedListIndentFirstOrder, .unorderedListIndentSecondOrder,
+		     .orderedList, .orderedListIndentFirstOrder, .orderedListIndentSecondOrder:
+			style = self.list
 		default:
 			style = self.body
 		}
@@ -134,7 +137,7 @@ extension SwiftyMarkdown {
 		case .blockquote:
 			return blockquotes.color
 		case .unorderedList, .unorderedListIndentFirstOrder, .unorderedListIndentSecondOrder, .orderedList, .orderedListIndentFirstOrder, .orderedListIndentSecondOrder:
-			return body.color
+			return list.color
 		case .yaml:
 			return body.color
 		case .referencedLink:

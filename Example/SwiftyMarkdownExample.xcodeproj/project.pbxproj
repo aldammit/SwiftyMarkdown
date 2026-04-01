@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 52;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -314,7 +314,7 @@
 			);
 			mainGroup = F4CE989F1C8AEF7D00D735C1;
 			packageReferences = (
-				F4B4A45E23E4E3DC00550249 /* XCRemoteSwiftPackageReference "SwiftyMarkdown" */,
+				F4B4A45E23E4E3DC00550249 /* XCLocalSwiftPackageReference "SwiftyMarkdown" */,
 			);
 			productRefGroup = F4CE98A91C8AEF7D00D735C1 /* Products */;
 			projectDirPath = "";
@@ -554,7 +554,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
@@ -604,7 +604,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
@@ -619,6 +619,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = SwiftyMarkdownExample/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -635,6 +636,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = SwiftyMarkdownExample/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -768,21 +770,17 @@
 		};
 /* End XCConfigurationList section */
 
-/* Begin XCRemoteSwiftPackageReference section */
-		F4B4A45E23E4E3DC00550249 /* XCRemoteSwiftPackageReference "SwiftyMarkdown" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/SimonFairbairn/SwiftyMarkdown.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 1.0.2;
-			};
+/* Begin XCLocalSwiftPackageReference section */
+		F4B4A45E23E4E3DC00550249 /* XCLocalSwiftPackageReference "SwiftyMarkdown" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../;
 		};
-/* End XCRemoteSwiftPackageReference section */
+/* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
 		F4B4A45F23E4E3DC00550249 /* SwiftyMarkdown */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = F4B4A45E23E4E3DC00550249 /* XCRemoteSwiftPackageReference "SwiftyMarkdown" */;
+			package = F4B4A45E23E4E3DC00550249 /* XCLocalSwiftPackageReference "SwiftyMarkdown" */;
 			productName = SwiftyMarkdown;
 		};
 /* End XCSwiftPackageProductDependency section */

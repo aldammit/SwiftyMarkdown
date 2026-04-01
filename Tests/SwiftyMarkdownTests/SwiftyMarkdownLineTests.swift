@@ -117,12 +117,12 @@ class SwiftyMarkdownTests: XCTestCase {
 	func testThatUnorderedListsAreHandledCorrectly() {
 		let dashBullets = StringTest(input: "An Unordered List\n- Item 1\n\t- Indented\n- Item 2", expectedOutput: "An Unordered List\n-\tItem 1\n\t-\tIndented\n-\tItem 2")
 		var md = SwiftyMarkdown(string: dashBullets.input)
-		md.bullet = "-"
+		md.bulletStyle = .string("-")
 		XCTAssertEqual(md.attributedString().string, dashBullets.expectedOutput)
 		
 		let starBullets = StringTest(input: "An Unordered List\n* Item 1\n\t* Indented\n* Item 2", expectedOutput: "An Unordered List\n-\tItem 1\n\t-\tIndented\n-\tItem 2")
 		md = SwiftyMarkdown(string: starBullets.input)
-		md.bullet = "-"
+		md.bulletStyle = .string("-")
 		XCTAssertEqual(md.attributedString().string, starBullets.expectedOutput)
 		
 	}

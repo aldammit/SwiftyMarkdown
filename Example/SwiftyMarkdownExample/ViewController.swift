@@ -41,16 +41,23 @@ class ViewController: UIViewController {
 			md.h2.alignment = .center
 			
 			md.code.fontName = "CourierNewPSMT"
-			
-
-			if #available(iOS 13.0, *) {
-				md.strikethrough.color = .tertiaryLabel
-			} else {
-				md.strikethrough.color = .lightGray
-			}
-			
+            
+            
+//			if #available(iOS 13.0, *) {
+//				md.strikethrough.color = .tertiaryLabel
+//			} else {
+//				md.strikethrough.color = .lightGray
+//			}
+            
 			md.blockquotes.fontStyle = .italic
-		
+
+			md.list.color = UIColor.systemIndigo
+			md.list.fontSize = 16.0
+			md.bulletStyle = .systemImage("circle.fill")
+			md.systemImage.color = UIColor.systemOrange
+			md.systemImage.size = CGSize(width: 16, height: 16)
+			md.systemImage.verticalOffset = -2.0
+
 			md.underlineLinks = true
 			
 			self.textView.attributedText = md.attributedString()
