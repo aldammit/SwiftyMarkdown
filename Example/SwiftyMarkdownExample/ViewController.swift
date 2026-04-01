@@ -48,7 +48,7 @@ class ViewController: UIViewController {
 //			} else {
 //				md.strikethrough.color = .lightGray
 //			}
-            
+            md.image.color = .systemPink
 			md.blockquotes.fontStyle = .italic
 
 			md.list.color = UIColor.systemIndigo

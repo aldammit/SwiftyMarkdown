@@ -575,16 +575,14 @@ extension SwiftyMarkdown {
 				case .image(let name):
 					if self.applyAttachments {
 						#if !os(macOS)
-						let lineFont = self.font(for: line)
-						let lineColor = self.color(for: line)
-						let baseAttrs: [NSAttributedString.Key: AnyObject] = [.font: lineFont, .foregroundColor: lineColor, .paragraphStyle: paragraphStyle]
-						let bstr = NSMutableAttributedString(string: indent, attributes: baseAttrs)
 						let attach = NSTextAttachment()
-						attach.image = UIImage(named: name)?.withTintColor(self.image.color ?? lineColor, renderingMode: .alwaysTemplate)
+                        if let tintColor = self.image.color {
+                            attach.image = UIImage(named: name)?.withTintColor(tintColor, renderingMode: .alwaysTemplate)
+                        } else {
+                            attach.image = UIImage(named: name)
+                        }
 						applyImageStyles(self.image, to: attach)
-						bstr.append(NSAttributedString(attachment: attach))
-						bstr.append(NSAttributedString(string: "\t", attributes: baseAttrs))
-						bulletAttachmentString = bstr
+						bulletAttachmentString = NSAttributedString(attachment: attach)
 						#else
 						finalTokens.insert(Token(type: .string, inputString: "\(indent)\t"), at: 0)
 						#endif
@@ -594,18 +592,22 @@ extension SwiftyMarkdown {
 				case .systemImage(let name):
 					if self.applyAttachments {
 						#if !os(macOS)
-						let lineFont = self.font(for: line)
-						let lineColor = self.color(for: line)
-						let baseAttrs: [NSAttributedString.Key: AnyObject] = [.font: lineFont, .foregroundColor: lineColor, .paragraphStyle: paragraphStyle]
-						let bstr = NSMutableAttributedString(string: indent, attributes: baseAttrs)
 						let attach = NSTextAttachment()
-						let config = UIImage.SymbolConfiguration(pointSize: lineFont.pointSize)
-						let tintColor = self.systemImage.color ?? lineColor
-						attach.image = UIImage(systemName: name, withConfiguration: config)?.withTintColor(tintColor, renderingMode: .alwaysTemplate)
-						applyImageStyles(self.systemImage, to: attach)
-						bstr.append(NSAttributedString(attachment: attach))
-						bstr.append(NSAttributedString(string: "\t", attributes: baseAttrs))
-						bulletAttachmentString = bstr
+                        let lineFont = self.font(for: line)
+                        let config = UIImage.SymbolConfiguration(pointSize: lineFont.pointSize)
+                        if let tintColor = self.systemImage.color {
+                            let lineColor = self.color(for: line)
+                            let baseAttrs: [NSAttributedString.Key: AnyObject] = [.font: lineFont, .foregroundColor: lineColor, .paragraphStyle: paragraphStyle]
+                            let bstr = NSMutableAttributedString(string: indent, attributes: baseAttrs)
+                            attach.image = UIImage(systemName: name, withConfiguration: config)?.withTintColor(tintColor, renderingMode: .alwaysTemplate)
+                            applyImageStyles(self.systemImage, to: attach)
+                            bstr.append(NSAttributedString(attachment: attach))
+                            bstr.append(NSAttributedString(string: "\t", attributes: baseAttrs))
+                            bulletAttachmentString = bstr
+                        } else {
+                            attach.image = UIImage(systemName: name, withConfiguration: config)
+                            bulletAttachmentString = NSAttributedString(attachment: attach)
+                        }
 						#else
 						finalTokens.insert(Token(type: .string, inputString: "\(indent)\t"), at: 0)
 						#endif
@@ -683,11 +685,14 @@ extension SwiftyMarkdown {
 					continue
 				}
 				#if !os(macOS)
-				let image1Attachment = NSTextAttachment()
-				let tintColor = self.image.color ?? (attributes[.foregroundColor] as? UIColor ?? .label)
-				image1Attachment.image = UIImage(named: token.metadataStrings[imgIdx])?.withTintColor(tintColor, renderingMode: .alwaysTemplate)
-				applyImageStyles(self.image, to: image1Attachment)
-				let str = NSAttributedString(attachment: image1Attachment)
+                let attach = NSTextAttachment()
+                if let tintColor = self.image.color {
+                    attach.image = UIImage(named: token.metadataStrings[imgIdx])?.withTintColor(tintColor, renderingMode: .alwaysTemplate)
+                } else {
+                    attach.image = UIImage(named: token.metadataStrings[imgIdx])
+                }
+				applyImageStyles(self.image, to: attach)
+				let str = NSAttributedString(attachment: attach)
 				finalAttributedString.append(str)
 				#elseif !os(watchOS)
 				let image1Attachment = NSTextAttachment()
@@ -705,11 +710,14 @@ extension SwiftyMarkdown {
 				let symbolName = token.metadataStrings[sfIdx]
 				let pointSize = (attributes[.font] as? UIFont)?.pointSize ?? UIFont.systemFontSize
 				let config = UIImage.SymbolConfiguration(pointSize: pointSize)
-				let sfAttach = NSTextAttachment()
-				let sfTintColor = self.systemImage.color ?? (attributes[.foregroundColor] as? UIColor ?? .label)
-				sfAttach.image = UIImage(systemName: symbolName, withConfiguration: config)?.withTintColor(sfTintColor, renderingMode: .alwaysTemplate)
-				applyImageStyles(self.systemImage, to: sfAttach)
-				finalAttributedString.append(NSAttributedString(attachment: sfAttach))
+				let attach = NSTextAttachment()
+				if let tintColor = self.systemImage.color {
+					attach.image = UIImage(systemName: symbolName, withConfiguration: config)?.withTintColor(tintColor, renderingMode: .alwaysTemplate)
+				} else {
+					attach.image = UIImage(systemName: symbolName, withConfiguration: config)
+				}
+				applyImageStyles(self.systemImage, to: attach)
+				finalAttributedString.append(NSAttributedString(attachment: attach))
 				#endif
 				continue
 			}
