@@ -2,22 +2,32 @@
 
 SwiftyMarkdown converts Markdown files and strings into `NSAttributedString`s using sensible defaults and a Swift-style syntax. It uses dynamic type to set the font size correctly with whatever font you'd like to use.
 
-- [What's New](#fully-rebuilt-for-2020)
+- [What's New](#whats-new)
 - [Installation](#installation)
 - [How to Use](#how-to-use-swiftymarkdown)
 - [Screenshot](#screenshot)
 - [Front Matter](#front-matter)
 - [Appendix](#appendix)
 
-## Fully Rebuilt For 2020!
+## What's New
 
-SwiftyMarkdown now features a more robust and reliable rules-based line processing and character tokenisation engine. It has added support for images stored in the bundle (`![Image](<Name In bundle>)`), codeblocks, blockquotes, and unordered lists!
+### List styles, image bullets & SF Symbol support
 
-Line-level attributes can now have a paragraph alignment applied to them (e.g. `h2.aligment = .center`), and links can be optionally underlined by setting `underlineLinks` to `true`. 
+- **`md.list`** — dedicated `LineStyles` for all list items (font, size, color, alignment). Previously list items inherited `body` styles.
+- **`md.bulletStyle`** — replaces the old `bullet: String` property. Now a `BulletType` enum:
+  - `.string("・")` — any string bullet (default, matches old behaviour)
+  - `.image("assetName")` — bundle image as bullet (iOS/macOS)
+  - `.systemImage("circle.fill")` — SF Symbol as bullet (iOS 13+)
+- **`md.image`** / **`md.systemImage`** — `ImageStyles` objects to tint, resize, and vertically offset image attachments rendered from `![Image](…)` and `_[Image](…)` inline syntax.
+- **Inline SF Symbols** — new `_[Image](symbolName)` syntax renders any SF Symbol inline, e.g. `_[Image](star.fill)`.
 
-It also uses the system color `.label` as the default font color on iOS 13 and above for Dark Mode support out of the box. 
+### Rebuilt For 2020
 
-Support for all of Apple's platforms has been enabled.
+SwiftyMarkdown features a robust rules-based line processing and character tokenisation engine. It supports images stored in the bundle (`![Image](<Name In bundle>)`), codeblocks, blockquotes, and lists.
+
+Line-level attributes can have a paragraph alignment applied (e.g. `h2.alignment = .center`), and links can be optionally underlined by setting `underlineLinks` to `true`.
+
+It uses the system color `.label` as the default font color on iOS 13+ for Dark Mode support. Support for all Apple platforms is enabled.
 
 ## Installation
 
@@ -91,6 +101,7 @@ label.attributedText = md.attributedString()
 
     [Links](http://voyagetravelapps.com/)
     ![Images](<Name of asset in bundle>)
+    _[Image](star.fill)       ← SF Symbol inline (iOS 13+, macOS 11+)
     
     [Referenced Links][1]
     ![Referenced Images][2]
@@ -137,7 +148,24 @@ md.italic.color = UIColor.blueColor()
 
 md.underlineLinks = true
 
-md.bullet = "🍏"
+// List item styles (font, color, size — applies to all list items)
+md.list.color = UIColor.systemIndigo
+md.list.fontSize = 16
+
+// Bullet type for unordered lists
+md.bulletStyle = .string("🍏")               // plain string (default "・")
+md.bulletStyle = .image("myBulletAsset")     // bundle image
+md.bulletStyle = .systemImage("circle.fill") // SF Symbol (iOS 13+)
+
+// Style image attachments (![Image](…) and _[Image](…))
+md.image.color = UIColor.systemBlue          // tint colour (nil = foreground colour)
+md.image.size = CGSize(width: 20, height: 20)// override natural size (.zero = natural)
+md.image.verticalOffset = -3.0               // baseline shift
+
+// SF Symbol bullets get their own style object
+md.systemImage.color = UIColor.systemOrange
+md.systemImage.size = CGSize(width: 16, height: 16)
+md.systemImage.verticalOffset = -2.0
 ```
 
 On iOS, Specified font sizes will be adjusted relative to the the user's dynamic type settings.
@@ -205,6 +233,15 @@ blockquotes.color : UI/NSColor
 blockquotes.fontStyle : FontStyle
 blockquotes.alignment : NSTextAlignment
 
+// All list items (ordered and unordered) — previously inherited body styles
+list.fontName : String
+list.fontSize : CGFloat
+list.color : UI/NSColor
+list.fontStyle : FontStyle
+list.alignment : NSTextAlignment
+list.lineSpacing : CGFloat
+list.paragraphSpacing : CGFloat
+
 link.fontName : String
 link.fontSize : CGFloat
 link.color : UI/NSColor
@@ -232,7 +269,18 @@ strikethrough.fontStyle : FontStyle
 
 underlineLinks : Bool
 
-bullet : String
+// Replaces the old `bullet: String` property
+bulletStyle : BulletType   // .string("・") | .image("assetName") | .systemImage("symbolName")
+
+// Tint / size / offset for bundle images rendered via ![Image](…)
+image.color : UI/NSColor?  // nil = use foreground colour
+image.size : CGSize        // .zero = natural image size
+image.verticalOffset : CGFloat
+
+// Same properties for SF Symbols rendered via _[Image](symbolName)
+systemImage.color : UI/NSColor?
+systemImage.size : CGSize
+systemImage.verticalOffset : CGFloat
 ```
 
 `FontStyle` is an enum with these cases: `normal`, `bold`, `italic`, and `bolditalic` to give you more precise control over how lines and character styles should look. For example, perhaps you want blockquotes to default to having the italic style:
